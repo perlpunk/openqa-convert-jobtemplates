@@ -1,0 +1,19 @@
+{
+   "TestSuites" : [
+      {
+         "settings" : [
+            {
+               "key" : "DESKTOP",
+               "value" : "textmode"
+            },
+            {
+               "key" : "FILESYSTEM",
+               "value" : "xfs"
+            }
+         ],
+         "name" : "textmode-server",
+         "description" : "testsuite description",
+         "id" : 1196
+      }
+   ]
+}

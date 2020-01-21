@@ -114,15 +114,34 @@ sub search_testsuite {
                 next unless $ev->{level} == $level + 1;
                 next if $ev->{event}->{name} ne 'scalar_event';
                 if ($ev->{event}->{value} eq 'settings') {
-                    say "========= SEQ $level settings" if DEBUG;
+                    my $settings_level = $ev->{level};
+                    say "========= SEQ $settings_level settings" if DEBUG;
                     my $sline           = $ev->{event}->{start}->{line};
                     my $next_map        = $ts_events[0]->{event};
                     my $map_col         = $next_map->{start}->{column};
-                    my $append_settings = inline_yaml($map_col, \%settings,);
+
+                    my @settings_events;
+                    my $start_line;
+                    my $end_line;
+                    while (my $ev = shift @ts_events) {
+                        if ($ev->{event}->{name} eq 'mapping_start_event') {
+                            next;
+                        }
+                        if ($ev->{event}->{name} eq 'mapping_end_event') {
+                            last;
+                        }
+                        $start_line ||= $ev->{event}->{start}->{line};
+                        $end_line = $ev->{event}->{end}->{line};
+                        pp($ev);
+                    }
+                    my $yaml = join '', @$lines[ $start_line .. $end_line ];
+                    $lines->[ $_ ] = '' for $start_line .. $end_line;
+                    my $append_settings = inline_yaml($map_col, \%settings, $yaml);
 
                     say "Appending settings to existing '$name:' entry";
                     $lines->[$sline] .= $append_settings;
                     $found_settings = 1;
+
                 }
                 elsif ($ev->{event}->{value} eq 'description') {
                     say "========= SEQ $level description" if DEBUG;
@@ -220,8 +239,16 @@ sub ts_yaml {
 
 
 sub inline_yaml {
-    my ($indent, $data) = @_;
-    my $yaml = YAML::PP->new(header => 0)->dump_string($data);
+    my ($indent, $data, $existing_yaml) = @_;
+    my $yp = YAML::PP->new(header => 0);
+    if ($existing_yaml) {
+        my $existing = $yp->load_string($existing_yaml);
+        %$data = (
+            %$data,
+            %$existing,
+        );
+    }
+    my $yaml = $yp->dump_string($data);
     $yaml =~ s/^/' ' x ($indent)/meg;
     return $yaml;
 }
