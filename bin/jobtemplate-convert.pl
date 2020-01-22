@@ -5,6 +5,7 @@ use warnings;
 use 5.010;
 
 use FindBin '$Bin';
+use File::Basename qw/ basename /;
 use lib "$Bin/../local/lib/perl5";
 use lib "$Bin/../lib";
 use JobTemplate qw/ inline_testsuite fetch_testsuite fetch_jobtemplate /;
@@ -12,8 +13,14 @@ use Data::Dumper;
 use Getopt::Long::Descriptive;
 use File::Path qw(make_path);
 
+my $basename = basename $0;
 my ($opt, $usage) = describe_options(
-    "$0 %o <jobtemplate-id> <testsuite-id>",
+    <<"EOM",
+ $basename %o <jobtemplate-id> <testsuite-ids>
+
+ e.g.
+ $basename --host o3 34 1195 1196
+EOM
     [ 'host=s',        'OpenQA host (e.g. o3, osd or localhost)', { required => 1 } ],
     [ 'apikey=s',      'API Key', { required => 1 } ],
     [ 'apisecret=s',   'API Secret', { required => 1 } ],
@@ -48,7 +55,7 @@ fetch_jobtemplate($data, $jt, %options);
 
 my $output = inline_testsuite(
     template => $template_file,
-    testsuite => $testsuite_file,
+    testsuite => [$testsuite_file],
     convert_multi => $opt->convert_multi,
 );
 unless (length $output) {

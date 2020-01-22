@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Data::Dumper;
 use FindBin '$Bin';
 
 use lib "$Bin/../local/lib/perl5";
@@ -12,7 +13,7 @@ my $template_file = "$dir/demo-template.yaml";
 my $testsuite_file = "$dir/demo-testsuite.json";
 my $output = inline_testsuite(
     template => $template_file,
-    testsuite => $testsuite_file,
+    testsuite => [$testsuite_file],
     convert_multi => 1,
 );
 

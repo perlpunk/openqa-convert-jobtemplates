@@ -17,17 +17,18 @@ sub inline_testsuite {
 
     my $yp = YAML::PP->new;
     my $template_file = $args{template};
-    my $testsuite_file = $args{testsuite};
+    my $testsuite_files = $args{testsuite};
     my $convert_multi = $args{convert_multi};
 
-    my $testsuite = do {
-        my $data       = $yp->load_file($testsuite_file);
-        my $testsuites = $data->{TestSuites} or die "No TestSuites";
-        $testsuites->[0];
-    };
+    my @testsuites = map {
+        my $data       = $yp->load_file($_);
+        my $list = $data->{TestSuites} or die "No TestSuites";
+        $list->[0];
+    } @$testsuite_files;
+    my %names = map { $_->{name} => 0 } @testsuites;
 
     my $template = $yp->load_file($template_file);
-    my $found_testsuite = 0;
+    my $found_testsuites = 0;
     my $archs = $template->{scenarios};
     for my $arch (sort keys %$archs) {
         my $products = $archs->{ $arch };
@@ -41,18 +42,27 @@ sub inline_testsuite {
                 else {
                     $name = $suite;
                 }
-                if ($name eq $testsuite->{name}) {
-                    $found_testsuite++;
+                if (exists $names{ $name }) {
+                    $names{ $name }++;
+                    $found_testsuites++;
                 }
             }
         }
     }
-    if ($found_testsuite == 0) {
-        say "Testsuite $testsuite->{name} not found in template";
+    if ($found_testsuites == 0) {
+        say "No matching testsuites found in template";
         return '';
     }
-    if ($found_testsuite > 1 and not $convert_multi) {
-        say "Testsuite $testsuite->{name} contained multiple times";
+    if (not $convert_multi) {
+        for my $name (sort keys %names) {
+            if ($names{ $name } > 1) {
+                say "Testsuite $name contained multiple times";
+                delete $names{ $name };
+            }
+        }
+    }
+    @testsuites = grep { ($names{ $_->{name} } || 0) > 1 } @testsuites;
+    unless (@testsuites) {
         return '';
     }
 
@@ -61,9 +71,12 @@ sub inline_testsuite {
     close $fh;
     my @events = parse_events($template_file);
 
-    while (1) {
-        my ($found) = JobTemplate::search_testsuite(\@lines, \@events, $testsuite);
-        last unless $found;
+    for my $testsuite (@testsuites) {
+        say "Processing $testsuite->{name}";
+        while (1) {
+            my ($found) = JobTemplate::search_testsuite(\@lines, \@events, $testsuite);
+            last unless $found;
+        }
     }
     return join '', @lines;
 }
