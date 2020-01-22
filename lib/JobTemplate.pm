@@ -62,7 +62,7 @@ sub inline_testsuite {
             }
         }
     }
-    @testsuites = grep { ($names{ $_->{name} } || 0) > 1 } @testsuites;
+    @testsuites = grep { ($names{ $_->{name} } || 0) >= 1 } @testsuites;
     unless (@testsuites) {
         return '';
     }
@@ -74,9 +74,10 @@ sub inline_testsuite {
 
     for my $testsuite (@testsuites) {
         say "Processing $testsuite->{name}";
+        my @local_events = @events;
         while (1) {
             my ($found) = search_testsuite(
-                \@lines, \@events, $testsuite,
+                \@lines, \@local_events, $testsuite,
                 empty_only => $empty_only,
             );
             last unless $found;

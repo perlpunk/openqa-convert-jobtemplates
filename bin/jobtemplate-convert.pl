@@ -42,21 +42,23 @@ my $data = "$Bin/../data/$host";
 make_path("$data/testsuites");
 make_path("$data/jobtemplates");
 
-my ($jt, $ts) = @ARGV;
+my ($jt, @ts) = @ARGV;
 my $template_file  = "$data/jobtemplates/$jt.yaml";
-my $testsuite_file = "$data/testsuites/$ts.json";
+my @testsuite_files = map { "$data/testsuites/$_.json" } @ts;
 
 my %options = (
     host_url => $host_url,
     apikey => $opt->apikey,
     apisecret => $opt->apisecret,
 );
-fetch_testsuite($data, $ts, %options);
+for my $ts (@ts) {
+    fetch_testsuite($data, $ts, %options);
+}
 fetch_jobtemplate($data, $jt, %options);
 
 my $output = inline_testsuite(
     template => $template_file,
-    testsuite => [$testsuite_file],
+    testsuite => \@testsuite_files,
     convert_multi => $opt->convert_multi,
     empty_only => $opt->empty_only,
 );

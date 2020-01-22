@@ -23,6 +23,10 @@ scenarios:
           DESKTOP: textmode
           FILESYSTEM: xfs
         testsuite: empty
-    - testsuite2
+    - testsuite2:
+        description: testsuite2 description
+        settings:
+          FOO: bar
+        testsuite: empty
     - foo
 

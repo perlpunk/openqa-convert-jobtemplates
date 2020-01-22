@@ -1,0 +1,15 @@
+{
+   "TestSuites" : [
+      {
+         "settings" : [
+            {
+               "key" : "FOO",
+               "value" : "bar"
+            }
+         ],
+         "name" : "testsuite2",
+         "description" : "testsuite2 description",
+         "id" : 1197
+      }
+   ]
+}

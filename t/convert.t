@@ -11,11 +11,7 @@ use JobTemplate qw/ inline_testsuite /;
 my $dir = "$Bin/data";
 my $template_file = "$dir/demo-template.yaml";
 my $testsuite_file = "$dir/demo-testsuite.json";
-my $output = inline_testsuite(
-    template => $template_file,
-    testsuite => [$testsuite_file],
-    convert_multi => 1,
-);
+my $testsuite2_file = "$dir/demo-testsuite2.json";
 
 my $expected1 = do {
     open my $fh, '<', "$dir/demo-template.yaml.expected1" or die $!;
@@ -25,6 +21,17 @@ my $expected2 = do {
     open my $fh, '<', "$dir/demo-template.yaml.expected2" or die $!;
     local $/; <$fh>;
 };
+my $expected3 = do {
+    open my $fh, '<', "$dir/demo-template.yaml.expected3" or die $!;
+    local $/; <$fh>;
+};
+
+my $output = inline_testsuite(
+    template => $template_file,
+    testsuite => [$testsuite_file],
+    convert_multi => 1,
+);
+
 my $ok = cmp_ok($output, 'eq', $expected1, "Converted template ok");
 unless ($ok) {
     show_diff($template_file, $output, $expected1);
@@ -41,6 +48,18 @@ $output = inline_testsuite(
 $ok = cmp_ok($output, 'eq', $expected2, "Converted template ok");
 unless ($ok) {
     show_diff($template_file, $output, $expected2);
+}
+
+$output = inline_testsuite(
+    template => $template_file,
+    testsuite => [$testsuite_file, $testsuite2_file],
+    convert_multi => 1,
+    empty_only => 1,
+);
+
+$ok = cmp_ok($output, 'eq', $expected3, "Converted template ok");
+unless ($ok) {
+    show_diff($template_file, $output, $expected3);
 }
 
 

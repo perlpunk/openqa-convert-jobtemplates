@@ -18,5 +18,6 @@ scenarios:
     - textmode-server:   # insert description and settings
         priority: 99
     - textmode-server    # append testsuite
+    - testsuite2
     - foo
 
