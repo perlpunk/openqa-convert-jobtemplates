@@ -25,6 +25,7 @@ EOM
     [ 'apikey=s',      'API Key', { required => 1 } ],
     [ 'apisecret=s',   'API Secret', { required => 1 } ],
     [ 'convert-multi', 'Also convert if testsuite is contained multiple times' ],
+    [ 'empty-only',    'Only convert plain "- name" testsuite entries, not existing settings' ],
     [ 'help',          "print usage message and exit", { shortcircuit => 1 } ],
 );
 print($usage->text), exit if $opt->help;
@@ -57,6 +58,7 @@ my $output = inline_testsuite(
     template => $template_file,
     testsuite => [$testsuite_file],
     convert_multi => $opt->convert_multi,
+    empty_only => $opt->empty_only,
 );
 unless (length $output) {
     exit;

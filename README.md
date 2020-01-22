@@ -12,5 +12,7 @@ Helper to convert openQA testsuites into inline definitions in jobtemplates
 	--apikey STR     API Key
 	--apisecret STR  API Secret
 	--convert-multi  Also convert if testsuite is contained multiple times
+	--empty-only     Only convert plain "- name" testsuite entries, not
+	                 existing settings
 	--help           print usage message and exit
 ```

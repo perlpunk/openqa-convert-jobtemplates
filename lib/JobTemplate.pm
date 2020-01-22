@@ -19,6 +19,7 @@ sub inline_testsuite {
     my $template_file = $args{template};
     my $testsuite_files = $args{testsuite};
     my $convert_multi = $args{convert_multi};
+    my $empty_only = $args{empty_only};
 
     my @testsuites = map {
         my $data       = $yp->load_file($_);
@@ -74,7 +75,10 @@ sub inline_testsuite {
     for my $testsuite (@testsuites) {
         say "Processing $testsuite->{name}";
         while (1) {
-            my ($found) = JobTemplate::search_testsuite(\@lines, \@events, $testsuite);
+            my ($found) = search_testsuite(
+                \@lines, \@events, $testsuite,
+                empty_only => $empty_only,
+            );
             last unless $found;
         }
     }
@@ -82,7 +86,8 @@ sub inline_testsuite {
 }
 
 sub search_testsuite {
-    my ($lines, $items, $ts) = @_;
+    my ($lines, $items, $ts, %args) = @_;
+    my $empty_only = $args{empty_only};
     my $name     = $ts->{name};
     my $settings = $ts->{settings};
     my %settings = map { $_->{key} => $_->{value} } @$settings;
@@ -107,6 +112,10 @@ sub search_testsuite {
         my $found_seq = $types->[$level] eq 'SEQ';
         if ($found_key) {
             say "========= KEY $level $name" if DEBUG;
+            if ($empty_only) {
+                say "Found '$name:' entry, but only processing empty '- $name' entries. Skip";
+                next;
+            }
             my $found_settings = 0;
             my $found_description;
             $tline = $event->{start}->{line};

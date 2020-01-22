@@ -17,53 +17,35 @@ my $output = inline_testsuite(
     convert_multi => 1,
 );
 
-my $expected = <<'EOM';
-products:
-  opensuse-Tumbleweed-DVD-s390x:
-    distri: opensuse
-    flavor: DVD
-    version: Tumbleweed
-scenarios:
-  s390x:
-    opensuse-Tumbleweed-DVD-s390x:
-    - textmode-server:   # insert description and new settings
-         description: testsuite description
-         testsuite: empty
-         settings:
-           DESKTOP: textmode
-           EXTRABOOTPARAMS: hvc_iucv=8
-           EXTRABOOTPARAMS2: hvc_iucv=9
-           FILESYSTEM: xfs
-    - textmode-server:   # insert description and merged settings
-         description: testsuite description
-         testsuite: empty
-         settings:
-             DESKTOP: textmode
-             FILESYSTEM: btrfs
-    - textmode-server:   # insert settings
-       settings:
-         DESKTOP: textmode
-         FILESYSTEM: xfs
-       testsuite: empty
-       description: foo
-    - textmode-server:   # insert description and settings
-        settings:
-          DESKTOP: textmode
-          FILESYSTEM: xfs
-        description: testsuite description
-        testsuite: empty
-        priority: 99
-    - textmode-server:    # append testsuite
-        description: testsuite description
-        settings:
-          DESKTOP: textmode
-          FILESYSTEM: xfs
-        testsuite: empty
-    - foo
-
-EOM
-my $ok = cmp_ok($output, 'eq', $expected, "Converted template ok");
+my $expected1 = do {
+    open my $fh, '<', "$dir/demo-template.yaml.expected1" or die $!;
+    local $/; <$fh>;
+};
+my $expected2 = do {
+    open my $fh, '<', "$dir/demo-template.yaml.expected2" or die $!;
+    local $/; <$fh>;
+};
+my $ok = cmp_ok($output, 'eq', $expected1, "Converted template ok");
 unless ($ok) {
+    show_diff($template_file, $output, $expected1);
+}
+
+
+$output = inline_testsuite(
+    template => $template_file,
+    testsuite => [$testsuite_file],
+    convert_multi => 1,
+    empty_only => 1,
+);
+
+$ok = cmp_ok($output, 'eq', $expected2, "Converted template ok");
+unless ($ok) {
+    show_diff($template_file, $output, $expected2);
+}
+
+
+sub show_diff {
+    my ($template_file, $output, $expected) = @_;
     my $file1 = "$template_file.expected";
     my $file2 = "$template_file.new";
     open my $fh, '>', $file1 or die $!;
