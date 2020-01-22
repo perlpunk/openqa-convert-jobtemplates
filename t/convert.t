@@ -63,8 +63,8 @@ scenarios:
 EOM
 my $ok = cmp_ok($output, 'eq', $expected, "Converted template ok");
 unless ($ok) {
-    my $file1 = "$template_file.new";
-    my $file2 = "$template_file.expected";
+    my $file1 = "$template_file.expected";
+    my $file2 = "$template_file.new";
     open my $fh, '>', $file1 or die $!;
     print $fh $expected;
     close $fh;

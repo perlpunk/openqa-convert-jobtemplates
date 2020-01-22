@@ -30,7 +30,7 @@ my %hosts = (
 my $host = $opt->host;
 my $host_url = $hosts{ $host }
     or die "Could not find host $host (must be o3, osd or localhost)";
-my $data = "$Bin/data/$host";
+my $data = "$Bin/../data/$host";
 make_path("$data/testsuites");
 make_path("$data/jobtemplates");
 
