@@ -9,6 +9,7 @@ our @EXPORT_OK = qw/ inline_testsuite fetch_testsuite fetch_jobtemplate /;
 use YAML::LibYAML::API::XS;
 use YAML::PP;
 use YAML::PP::Common;
+use File::Path qw(make_path);
 
 use constant DEBUG => $ENV{DEBUG} ? 1 : 0;
 
@@ -281,12 +282,20 @@ sub fetch_testsuite {
     my $host_url = $args{host_url};
     my $apikey = $args{apikey};
     my $apisecret = $args{apisecret};
+    make_path("$data/testsuites");
     my $file = "$data/testsuites/$id.json";
     unless (-e $file) {
         say "Fetching $file";
+        my $arg;
+        if ($id =~ tr/0-9//c) {
+            $arg = "name=$id";
+        }
+        else {
+            $arg = "id=$id";
+        }
         my $cmd
-          = sprintf "openqa-client --host %s --apikey=%s --apisecret=%s --json-output test_suites/%d get >%s",
-          $host_url, $apikey, $apisecret, $id, $file;
+          = sprintf "openqa-client --host %s --apikey=%s --apisecret=%s --json-output test_suites get '%s' >%s",
+          $host_url, $apikey, $apisecret, $arg, $file;
         system $cmd;
         if ($?) {
             warn "Cmd '$cmd' failed";
@@ -300,6 +309,7 @@ sub fetch_jobtemplate {
     my $host_url = $args{host_url};
     my $apikey = $args{apikey};
     my $apisecret = $args{apisecret};
+    make_path("$data/jobtemplates");
     my $file = "$data/jobtemplates/$id.yaml";
     unless (-e $file) {
         say "Fetching $file";

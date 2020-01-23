@@ -11,7 +11,6 @@ use lib "$Bin/../lib";
 use JobTemplate qw/ inline_testsuite fetch_testsuite fetch_jobtemplate /;
 use Data::Dumper;
 use Getopt::Long::Descriptive;
-use File::Path qw(make_path);
 
 my $basename = basename $0;
 my ($opt, $usage) = describe_options(
@@ -20,6 +19,7 @@ my ($opt, $usage) = describe_options(
 
  e.g.
  $basename --host o3 34 1195 1196
+ $basename --host o3 34 name1 name2
 EOM
     [ 'host=s',        'OpenQA host (e.g. o3, osd or localhost)', { required => 1 } ],
     [ 'apikey=s',      'API Key', { required => 1 } ],
@@ -39,8 +39,6 @@ my $host = $opt->host;
 my $host_url = $hosts{ $host }
     or die "Could not find host $host (must be o3, osd or localhost)";
 my $data = "$Bin/../data/$host";
-make_path("$data/testsuites");
-make_path("$data/jobtemplates");
 
 my ($jt, @ts) = @ARGV;
 my $template_file  = "$data/jobtemplates/$jt.yaml";

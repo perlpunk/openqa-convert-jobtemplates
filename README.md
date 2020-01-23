@@ -7,6 +7,7 @@ Helper to convert openQA testsuites into inline definitions in jobtemplates
 
  e.g.
  jobtemplate-convert.pl --host o3 34 1195 1196
+ jobtemplate-convert.pl --host o3 34 name1 name2
 
 	--host STR       OpenQA host (e.g. o3, osd or localhost)
 	--apikey STR     API Key
