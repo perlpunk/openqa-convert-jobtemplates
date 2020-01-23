@@ -39,7 +39,12 @@ sub inline_testsuite {
             for my $suite (@$suites) {
                 my $name;
                 if (ref $suite eq 'HASH') {
-                    ($name) = keys %$suite;
+                    ($name, my $value) = %$suite;
+                    if ($value->{testsuite}) {
+                        # test suite name defined by 'testsuite' key
+                        # not supported currently
+                        $name = '';
+                    }
                 }
                 else {
                     $name = $suite;

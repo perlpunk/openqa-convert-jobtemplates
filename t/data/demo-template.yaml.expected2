@@ -25,4 +25,6 @@ scenarios:
         testsuite: empty
     - testsuite2
     - foo
+    - bar:
+        testsuite: textmode-server
 

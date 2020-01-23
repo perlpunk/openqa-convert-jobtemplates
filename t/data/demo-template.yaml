@@ -20,4 +20,6 @@ scenarios:
     - textmode-server    # append testsuite
     - testsuite2
     - foo
+    - bar:
+        testsuite: textmode-server
 
