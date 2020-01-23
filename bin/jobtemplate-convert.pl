@@ -16,10 +16,12 @@ my $basename = basename $0;
 my ($opt, $usage) = describe_options(
     <<"EOM",
  $basename %o <jobtemplate-id> <testsuite-ids>
+ $basename %o <local-jobtemplate-file> <testsuite-ids>
 
  e.g.
  $basename --host o3 34 1195 1196
  $basename --host o3 34 name1 name2
+ $basename --host o3 /path/to/local/jobtemplate.yaml name1 name2
 EOM
     [ 'host=s',        'OpenQA host (e.g. o3, osd or localhost)', { required => 1 } ],
     [ 'apikey=s',      'API Key' ],
@@ -41,8 +43,6 @@ my $host_url = $hosts{ $host }
 my $data = "$Bin/../data/$host";
 
 my ($jt, @ts) = @ARGV;
-my $template_file  = "$data/jobtemplates/$jt.yaml";
-my @testsuite_files = map { "$data/testsuites/$_.json" } @ts;
 
 my %options = (
     host_url => $host_url,
@@ -52,7 +52,20 @@ my %options = (
 for my $ts (@ts) {
     fetch_testsuite($data, $ts, %options);
 }
-fetch_jobtemplate($data, $jt, %options);
+my @testsuite_files = map { "$data/testsuites/$_.json" } @ts;
+
+my $template_file  = "$data/jobtemplates/$jt.yaml";
+if ($jt =~ tr/0-9//c) {
+    # no id, test if filename
+    unless (-f $jt) {
+        say "Parameter jobtemplate must be an id or a local file";
+        exit 1;
+    }
+    $template_file = $jt;
+}
+else {
+    fetch_jobtemplate($data, $jt, %options);
+}
 
 my $output = inline_testsuite(
     template => $template_file,
@@ -68,7 +81,7 @@ print $fh $output;
 close $fh;
 
 say "Created $template_file.new";
-my $diff = "/tmp/diff-$jt.diff";
+my $diff = "/tmp/diff-$$.diff";
 my $diffcmd = "colordiff -u999 $template_file* >$diff";
 my $rc = system($diffcmd);
 unless ($rc) {
