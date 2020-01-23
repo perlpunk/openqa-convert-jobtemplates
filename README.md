@@ -17,5 +17,6 @@ Helper to convert openQA testsuites into inline definitions in jobtemplates
 	--convert-multi  Also convert if testsuite is contained multiple times
 	--empty-only     Only convert plain "- name" testsuite entries, not
 	                 existing settings
+	--update         Actually post the updated template to the server
 	--help           print usage message and exit
 ```

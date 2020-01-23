@@ -4,12 +4,16 @@ use strict;
 use 5.010;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/ inline_testsuite fetch_testsuite fetch_jobtemplate /;
+our @EXPORT_OK = qw/
+    inline_testsuite fetch_testsuite fetch_jobtemplate
+    post_jobtemplate
+/;
 
 use YAML::LibYAML::API::XS;
 use YAML::PP;
 use YAML::PP::Common;
 use File::Path qw(make_path);
+use JSON::PP;
 
 use constant DEBUG => $ENV{DEBUG} ? 1 : 0;
 
@@ -330,6 +334,57 @@ sub fetch_jobtemplate {
     }
 }
 
+sub post_jobtemplate {
+    my %args = @_;
+    my $id = $args{id} or die "Job template ID required";
+    my $file = $args{file};
+    my $apikey = $args{apikey} or die "API key required";
+    my $apisecret = $args{apisecret} or die "API secret required";
+    my $host_url = $args{host};
+
+    open my $fh, '<', $file or die "Could not open '$file': $!";
+    my $yaml = do { local $/; <$fh> };
+    close $fh;
+    $yaml =~ s/"/\\"/g;
+
+    my $preview = 1;
+    my $cmdfmt = 'openqa-client --host %s --apikey=%s --apisecret=%s job_templates_scheduling/%s post --json-output --form schema=JobTemplates-01.yaml preview=%s template="%s"';
+    my $_cmd = sprintf $cmdfmt,
+        $host_url, '$key', '$secret', $id, $preview, '$template';
+    say "Preview (Command: $_cmd)";
+    my $cmd = sprintf $cmdfmt,
+        $host_url, $apikey, $apisecret, $id, $preview, $yaml;
+    my $out = qx{$cmd};
+    say "Response:\n$out\n";
+    my $json = decode_json($out);
+    unless ($json->{changes}) {
+        say "No changes";
+        return;
+    }
+    say "Changes:";
+    say $json->{changes};
+
+    print "Post (press Enter)";
+    my $enter = <STDIN>;
+    $preview = 0;
+    $_cmd = sprintf $cmdfmt,
+        $host_url, '$key', '$secret', $id, $preview, '$template';
+    say "Command: $_cmd";
+    $cmd = sprintf $cmdfmt,
+        $host_url, $apikey, $apisecret, $id, $preview, $yaml;
+    $out = qx{$cmd};
+    say "Response:\n$out\n";
+    $json = decode_json($out);
+    unless ($json->{changes}) {
+        say "No changes";
+        return;
+    }
+    say "Changes:";
+    say $json->{changes};
+
+    say "Successfully posted new template";
+
+}
 
 sub pp {
     my ($ev) = @_;

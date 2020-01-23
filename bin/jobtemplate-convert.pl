@@ -8,7 +8,10 @@ use FindBin '$Bin';
 use File::Basename qw/ basename /;
 use lib "$Bin/../local/lib/perl5";
 use lib "$Bin/../lib";
-use JobTemplate qw/ inline_testsuite fetch_testsuite fetch_jobtemplate /;
+use JobTemplate qw/
+    inline_testsuite fetch_testsuite fetch_jobtemplate
+    post_jobtemplate
+/;
 use Data::Dumper;
 use Getopt::Long::Descriptive;
 
@@ -28,6 +31,7 @@ EOM
     [ 'apisecret=s',   'API Secret' ],
     [ 'convert-multi', 'Also convert if testsuite is contained multiple times' ],
     [ 'empty-only',    'Only convert plain "- name" testsuite entries, not existing settings' ],
+    [ 'update',        'Actually post the updated template to the server' ],
     [ 'help',          "print usage message and exit", { shortcircuit => 1 } ],
 );
 print($usage->text), exit if $opt->help;
@@ -54,6 +58,7 @@ for my $ts (@ts) {
 }
 my @testsuite_files = map { "$data/testsuites/$_.json" } @ts;
 
+my $local = 0;
 my $template_file  = "$data/jobtemplates/$jt.yaml";
 if ($jt =~ tr/0-9//c) {
     # no id, test if filename
@@ -62,6 +67,7 @@ if ($jt =~ tr/0-9//c) {
         exit 1;
     }
     $template_file = $jt;
+    $local = 1;
 }
 else {
     fetch_jobtemplate($data, $jt, %options);
@@ -89,6 +95,8 @@ unless ($rc) {
     unlink $diff;
     exit;
 }
+print "Showing diff (press Enter)";
+my $enter = <STDIN>;
 $rc = system("less $diff");
 unlink $diff;
 my $out = qx{openqa-validate-yaml $template_file.new 2>&1};
@@ -98,5 +106,28 @@ if ($?) {
 }
 say "Validation of new file passed";
 
+if ($local) {
+    say "Thew new file can be found at $template_file.new";
+    exit;
+}
+unless ($opt->update) {
+    say "No --update was given, done";
+    exit;
+}
+print "Post new jobtemplate to $host_url? (Y/n) ";
+chomp(my $answer = <STDIN>);
+$answer = lc $answer;
+$answer ||= 'y';
+if ($answer ne 'y') {
+    say "Not posting new template. Done";
+    exit;
+}
+post_jobtemplate(
+    id => $jt,
+    file => "$template_file.new",
+    apikey => $opt->apikey,
+    apisecret => $opt->apisecret,
+    host => $host_url,
+);
 
 exit;
