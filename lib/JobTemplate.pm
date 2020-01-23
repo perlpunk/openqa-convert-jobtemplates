@@ -294,8 +294,8 @@ sub fetch_testsuite {
             $arg = "id=$id";
         }
         my $cmd
-          = sprintf "openqa-client --host %s --apikey=%s --apisecret=%s --json-output test_suites get '%s' >%s",
-          $host_url, $apikey, $apisecret, $arg, $file;
+          = sprintf "openqa-client --host %s --json-output test_suites get '%s' >%s",
+          $host_url, $arg, $file;
         system $cmd;
         if ($?) {
             warn "Cmd '$cmd' failed";
@@ -315,8 +315,8 @@ sub fetch_jobtemplate {
         say "Fetching $file";
         my $cmd
           = sprintf
-"openqa-client --host %s --apikey=%s --apisecret=%s job_templates_scheduling/%s get | jq --raw-output . >%s",
-          $host_url, $apikey, $apisecret, $id, $file;
+"openqa-client --host %s  job_templates_scheduling/%s get | jq --raw-output . >%s",
+          $host_url, $id, $file;
         system $cmd;
         if ($?) {
             warn "Cmd '$cmd' failed";

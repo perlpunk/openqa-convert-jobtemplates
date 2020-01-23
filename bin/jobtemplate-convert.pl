@@ -22,8 +22,8 @@ my ($opt, $usage) = describe_options(
  $basename --host o3 34 name1 name2
 EOM
     [ 'host=s',        'OpenQA host (e.g. o3, osd or localhost)', { required => 1 } ],
-    [ 'apikey=s',      'API Key', { required => 1 } ],
-    [ 'apisecret=s',   'API Secret', { required => 1 } ],
+    [ 'apikey=s',      'API Key' ],
+    [ 'apisecret=s',   'API Secret' ],
     [ 'convert-multi', 'Also convert if testsuite is contained multiple times' ],
     [ 'empty-only',    'Only convert plain "- name" testsuite entries, not existing settings' ],
     [ 'help',          "print usage message and exit", { shortcircuit => 1 } ],
