@@ -2,7 +2,7 @@
 
 update: README.md
 
-README.md: bin/jobtemplate-convert.pl
+README.md: bin/jobtemplate-inline-testsuite.pl
 	perl bin/update-readme.pl
 
 test:

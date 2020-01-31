@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-my $out = qx{perl ./bin/jobtemplate-convert.pl --help};
+my $out = qx{perl ./bin/jobtemplate-inline-testsuite.pl --help};
 my $usage = "```\n$out```\n";
 
 open my $fh, '<', 'README.md' or die $!;

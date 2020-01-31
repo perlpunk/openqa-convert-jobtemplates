@@ -24,6 +24,7 @@ my ($opt, $usage) = describe_options(
  e.g.
  $basename --host o3 34 1195 1196
  $basename --host o3 34 name1 name2
+ $basename --host o3 34 name1 name2 --update
  $basename --host o3 /path/to/local/jobtemplate.yaml name1 name2
 EOM
     [ 'host=s',        'OpenQA host (e.g. o3, osd or localhost)', { required => 1 } ],
