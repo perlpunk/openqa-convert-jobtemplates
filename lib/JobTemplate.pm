@@ -197,8 +197,8 @@ sub search_testsuite {
                 $lines->[$tline] .= $desc_yaml;
             }
 
-            my $yaml = inline_yaml($map_col, {testsuite => 'empty'},);
-            say "Inserting 'testsuite: empty' into '$name:' entry";
+            my $yaml = inline_yaml($map_col, {testsuite => undef},);
+            say "Inserting 'testsuite: null' into '$name:' entry";
             $lines->[$tline] .= $yaml;
             return $found_key;
         }
@@ -262,7 +262,7 @@ sub ts_yaml {
     my $settings = delete $ts->{settings};
     my %settings = map { $_->{key} => $_->{value} } @$settings;
     my %data     = (
-        testsuite   => 'empty',
+        testsuite   => undef,
         description => $ts->{description},
         settings    => \%settings,
     );

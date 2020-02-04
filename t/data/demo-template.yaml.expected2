@@ -22,7 +22,7 @@ scenarios:
         settings:
           DESKTOP: textmode
           FILESYSTEM: xfs
-        testsuite: empty
+        testsuite: null
     - testsuite2
     - foo
     - bar:

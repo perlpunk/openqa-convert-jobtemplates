@@ -22,12 +22,12 @@ scenarios:
         settings:
           DESKTOP: textmode
           FILESYSTEM: xfs
-        testsuite: empty
+        testsuite: null
     - testsuite2:
         description: testsuite2 description
         settings:
           FOO: bar
-        testsuite: empty
+        testsuite: null
     - foo
     - bar:
         testsuite: textmode-server
