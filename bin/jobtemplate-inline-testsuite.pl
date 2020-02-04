@@ -89,7 +89,7 @@ close $fh;
 
 say "Created $template_file.new";
 my $diff = "/tmp/diff-$$.diff";
-my $diffcmd = "colordiff -u999 $template_file* >$diff";
+my $diffcmd = "colordiff -u999 $template_file $template_file.new >$diff";
 my $rc = system($diffcmd);
 unless ($rc) {
     say "Nothing changed";
