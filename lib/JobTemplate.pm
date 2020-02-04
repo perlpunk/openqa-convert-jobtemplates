@@ -383,6 +383,9 @@ sub post_jobtemplate {
     say $json->{changes};
 
     say "Successfully posted new template";
+    open $fh, '>', "$file.posted" or die $!;
+    say $fh "Posted successfully";
+    close $fh;
 
 }
 
