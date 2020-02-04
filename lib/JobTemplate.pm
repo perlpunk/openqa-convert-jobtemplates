@@ -329,8 +329,7 @@ sub fetch_jobtemplate {
     unless (-e $file) {
         say "Fetching $file";
         my $cmd
-          = sprintf
-"openqa-client --host %s  job_templates_scheduling/%s get | jq --raw-output . >%s",
+          = sprintf "curl %s/api/v1/job_templates_scheduling/%s >%s",
           $host_url, $id, $file;
         system $cmd;
         if ($?) {
