@@ -14,6 +14,7 @@ use YAML::PP;
 use YAML::PP::Common;
 use File::Path qw(make_path);
 use JSON::PP;
+use Storable 'dclone';
 
 use constant DEBUG => $ENV{DEBUG} ? 1 : 0;
 
@@ -84,6 +85,14 @@ sub inline_testsuite {
 
     for my $testsuite (@testsuites) {
         say "Processing $testsuite->{name}";
+        my $settings = $testsuite->{settings};
+        my %settings = map {
+            my $value = $_->{value};
+            $value =~ s/ +$//; # remove trailing spaces
+            $_->{key} => $value;
+        } @$settings;
+        $testsuite->{settings} = \%settings;
+        $testsuite->{description} //= '';
         my @local_events = @events;
         while (1) {
             my ($found) = search_testsuite(
@@ -98,10 +107,9 @@ sub inline_testsuite {
 
 sub search_testsuite {
     my ($lines, $items, $ts, %args) = @_;
+    $ts = dclone($ts);
     my $empty_only = $args{empty_only};
     my $name     = $ts->{name};
-    my $settings = $ts->{settings};
-    my %settings = map { $_->{key} => $_->{value} } @$settings;
     return unless @$items;
     my $tline = 0;
     my $tcol  = 0;
@@ -169,7 +177,7 @@ sub search_testsuite {
                     }
                     my $yaml = join '', @$lines[ $start_line .. $end_line ];
                     $lines->[ $_ ] = '' for $start_line .. $end_line;
-                    my $append_settings = inline_yaml($map_col, \%settings, $yaml);
+                    my $append_settings = inline_yaml($map_col, $ts->{settings}, $yaml);
 
                     say "Appending settings to existing '$name:' entry";
                     $lines->[$sline] .= $append_settings;
@@ -184,14 +192,14 @@ sub search_testsuite {
                 }
             }
             unless ($found_settings) {
-                my $append_settings = inline_yaml($map_col + 2, \%settings,);
+                my $append_settings = inline_yaml($map_col + 2, $ts->{settings});
                 $append_settings = (' ' x ($map_col)) . "settings:\n" . $append_settings;
 
                 say "Inserting settings into '$name:' entry";
                 $lines->[$tline] .= $append_settings;
             }
             unless ($found_description) {
-                my $desc_yaml = inline_yaml($map_col, {description => $ts->{description}},);
+                my $desc_yaml = inline_yaml($map_col, {description => $ts->{description}});
 
                 say "Inserting description into '$name:' entry";
                 $lines->[$tline] .= $desc_yaml;
@@ -259,12 +267,10 @@ sub parse_events {
 
 sub ts_yaml {
     my ($ts)     = @_;
-    my $settings = delete $ts->{settings};
-    my %settings = map { $_->{key} => $_->{value} } @$settings;
     my %data     = (
         testsuite   => undef,
         description => $ts->{description},
-        settings    => \%settings,
+        settings    => $ts->{settings},
     );
     my $yaml = YAML::PP->new(header => 0)->dump_string(\%data);
     return $yaml;
