@@ -93,6 +93,7 @@ sub inline_testsuite {
         } @$settings;
         $testsuite->{settings} = \%settings;
         $testsuite->{description} //= '';
+        $testsuite->{description} =~ s/ +$//; # remove trailing spaces
         my @local_events = @events;
         while (1) {
             my ($found) = search_testsuite(
