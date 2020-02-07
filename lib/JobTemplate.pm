@@ -21,7 +21,7 @@ use constant DEBUG => $ENV{DEBUG} ? 1 : 0;
 sub inline_testsuite {
     my %args = @_;
 
-    my $yp = YAML::PP->new;
+    my $yp = YAML::PP->new( schema => [qw/ Core /] );
     my $template_file = $args{template};
     my $testsuite_files = $args{testsuite};
     my $convert_multi = $args{convert_multi};
@@ -273,14 +273,14 @@ sub ts_yaml {
         description => $ts->{description},
         settings    => $ts->{settings},
     );
-    my $yaml = YAML::PP->new(header => 0)->dump_string(\%data);
+    my $yaml = YAML::PP->new(header => 0, schema => [qw/ Core /])->dump_string(\%data);
     return $yaml;
 }
 
 
 sub inline_yaml {
     my ($indent, $data, $existing_yaml) = @_;
-    my $yp = YAML::PP->new(header => 0);
+    my $yp = YAML::PP->new(header => 0, schema => [qw/ Core /]);
     if ($existing_yaml) {
         my $existing = $yp->load_string($existing_yaml);
         %$data = (
