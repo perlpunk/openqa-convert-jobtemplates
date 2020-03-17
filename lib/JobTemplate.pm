@@ -81,6 +81,9 @@ sub inline_testsuite {
     open my $fh, '<:encoding(UTF-8)', $template_file or die $!;
     my @lines = <$fh>;
     close $fh;
+    unless ($lines[-1] =~ m/\n\z/) {
+        $lines[-1] .= "\n";
+    }
     my @events = parse_events($template_file);
 
     for my $testsuite (@testsuites) {
